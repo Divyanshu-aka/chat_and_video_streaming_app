@@ -2,3 +2,6 @@
 /dist
 /.env
 /logs
+/public/uploads/*
+!/public/uploads/.gitkeep
+

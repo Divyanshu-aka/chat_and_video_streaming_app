@@ -87,13 +87,13 @@ const sendMessage = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Chat not found");
   }
 
-  const attachedFiles: { url: string; filename: string }[] = [];
+  const attachedFiles: { url: string; localPath: string }[] = [];
 
   if (files?.attachments && files.attachments.length > 0) {
     files.attachments.map((attachment) => {
       attachedFiles.push({
         url: getStaticFilePath(req, attachment.filename),
-        filename: getLocalFilePath(attachment.filename),
+        localPath: getLocalFilePath(attachment.filename),
       });
     });
   }
@@ -177,7 +177,9 @@ const deleteMessage = asyncHandler(async (req, res) => {
   // Delete attached files from local storage
   if (message.attachments.length > 0) {
     message.attachments.map((attachment) => {
-      removeLocalFile(attachment.localPath);
+      if (attachment.localPath) {
+        removeLocalFile(attachment.localPath);
+      }
     });
   }
 
