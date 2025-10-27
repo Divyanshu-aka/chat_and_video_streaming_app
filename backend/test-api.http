@@ -1,0 +1,169 @@
+### API Testing File for Chat & Video Streaming App
+### Use REST Client extension in VS Code to run these tests
+### Base URL
+@baseUrl = http://localhost:8080/api/v1
+@accessToken = your_access_token_here
+
+### ========================================
+### 🔐 AUTHENTICATION ROUTES
+### ========================================
+
+### 1. Register User
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser1",
+  "email": "testuser1@example.com",
+  "password": "password123"
+}
+
+### 2. Register Another User (for chat testing)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser2",
+  "email": "testuser2@example.com",
+  "password": "password123"
+}
+
+### 3. Login User
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuser1@example.com",
+  "password": "password123"
+}
+
+### 4. Get Current User
+GET {{baseUrl}}/auth/current-user
+Authorization: Bearer {{accessToken}}
+
+### 5. Refresh Access Token
+POST {{baseUrl}}/auth/refresh-token
+Content-Type: application/json
+
+{
+  "refreshToken": "your_refresh_token_here"
+}
+
+### 6. Change Password
+POST {{baseUrl}}/auth/change-password
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "oldPassword": "password123",
+  "newPassword": "newpassword123"
+}
+
+### 7. Logout User
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{accessToken}}
+
+### ========================================
+### 💬 CHAT ROUTES
+### ========================================
+
+### 8. Get All Chats
+GET {{baseUrl}}/chats
+Authorization: Bearer {{accessToken}}
+
+### 9. Search Available Users
+GET {{baseUrl}}/chats/users
+Authorization: Bearer {{accessToken}}
+
+### 10. Create One-on-One Chat
+POST {{baseUrl}}/chats/one-on-one/USER_ID_HERE
+Authorization: Bearer {{accessToken}}
+
+### 11. Create Group Chat
+POST {{baseUrl}}/chats/group
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Group Chat",
+  "participants": ["userId1", "userId2"]
+}
+
+### 12. Get Group Chat Details
+GET {{baseUrl}}/chats/group/CHAT_ID_HERE
+Authorization: Bearer {{accessToken}}
+
+### 13. Rename Group Chat
+PATCH {{baseUrl}}/chats/group/CHAT_ID_HERE
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Updated Group Name"
+}
+
+### 14. Add Participant to Group
+POST {{baseUrl}}/chats/group/CHAT_ID_HERE/PARTICIPANT_ID_HERE
+Authorization: Bearer {{accessToken}}
+
+### 15. Remove Participant from Group
+DELETE {{baseUrl}}/chats/group/CHAT_ID_HERE/PARTICIPANT_ID_HERE
+Authorization: Bearer {{accessToken}}
+
+### 16. Leave Group Chat
+DELETE {{baseUrl}}/chats/leave/group/CHAT_ID_HERE
+Authorization: Bearer {{accessToken}}
+
+### 17. Delete Group Chat
+DELETE {{baseUrl}}/chats/group/CHAT_ID_HERE
+Authorization: Bearer {{accessToken}}
+
+### 18. Delete One-on-One Chat
+DELETE {{baseUrl}}/chats/delete/one-on-one/CHAT_ID_HERE
+Authorization: Bearer {{accessToken}}
+
+### ========================================
+### 📨 MESSAGE ROUTES
+### ========================================
+
+### 19. Get All Messages in Chat
+GET {{baseUrl}}/messages/CHAT_ID_HERE
+Authorization: Bearer {{accessToken}}
+
+### 20. Send Message (Text Only)
+POST {{baseUrl}}/messages/CHAT_ID_HERE
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "content": "Hello! This is a test message."
+}
+
+### 21. Send Message with Attachments
+# Note: Use multipart/form-data for file uploads
+POST {{baseUrl}}/messages/CHAT_ID_HERE
+Authorization: Bearer {{accessToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="content"
+
+Message with attachment
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="attachments"; filename="test.txt"
+Content-Type: text/plain
+
+< ./test-file.txt
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### 22. Delete Message
+DELETE {{baseUrl}}/messages/CHAT_ID_HERE/MESSAGE_ID_HERE
+Authorization: Bearer {{accessToken}}
+
+### ========================================
+### 🔍 HEALTH CHECK
+### ========================================
+
+### 23. Test Server Status
+GET http://localhost:8080/

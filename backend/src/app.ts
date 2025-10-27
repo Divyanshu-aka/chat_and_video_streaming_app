@@ -36,9 +36,11 @@ app.use(cookieParser());
 app.use(morganMiddleware);
 
 //api routes
+import authRouter from "./routes/auth.routes.js";
 import chatRouter from "./routes/chat.routes.js";
 import messageRouter from "./routes/message.routes.js";
 
+app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/chats", chatRouter);
 app.use("/api/v1/messages", messageRouter);
 

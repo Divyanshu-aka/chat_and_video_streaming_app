@@ -1,4 +1,4 @@
-import mongoose, { set } from "mongoose";
+import mongoose from "mongoose";
 import { ChatEventEnum, type IAttachment } from "../utils/constants.js";
 import { User } from "../models/user.model.js";
 import { Chat } from "../models/chat.models.js";
