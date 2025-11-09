@@ -1,34 +1,76 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+// Importing required modules and components from the react-router-dom and other files.
+import { Routes, Route, Navigate } from "react-router-dom";
+import Auth from "./pages/auth";
+import ChatPage from "./pages/chat";
+import ProfilePage from "./pages/profile";
+import { useAuth } from "./context/AuthContext";
+import PrivateRoute from "./components/PrivateRoute";
+import PublicRoute from "./components/PublicRoute";
 
-function App() {
-  const [count, setCount] = useState(0)
+// Main App component
+const App = () => {
+  // Extracting 'token' and 'user' from the authentication context
+  const { token, user } = useAuth();
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <Routes>
+      {/* Root route: Redirects to chat if the user is logged in, else to the login page */}
+      <Route
+        path="/"
+        element={
+          token && user?._id ? (
+            <Navigate to="/chat" />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      ></Route>
 
-export default App
+      {/* Private chat route: Can only be accessed by authenticated users */}
+      <Route
+        path="/chat"
+        element={
+          <PrivateRoute>
+            <ChatPage />
+          </PrivateRoute>
+        }
+      />
+
+      {/* Private profile route: Can only be accessed by authenticated users */}
+      <Route
+        path="/profile"
+        element={
+          <PrivateRoute>
+            <ProfilePage />
+          </PrivateRoute>
+        }
+      />
+
+      {/* Public login route: Accessible by everyone */}
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <Auth />
+          </PublicRoute>
+        }
+      />
+
+      {/* Public register route: Accessible by everyone */}
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <Auth />
+          </PublicRoute>
+        }
+      />
+
+      {/* Wildcard route for undefined paths. Shows a 404 error */}
+      <Route path="*" element={<p>404 Not found</p>} />
+    </Routes>
+  );
+};
+
+// Exporting the App component to be used in other parts of the application
+export default App;

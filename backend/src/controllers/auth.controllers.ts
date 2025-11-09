@@ -3,6 +3,7 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { getLocalFilePath, getStaticFilePath, removeLocalFile} from "../utils/helpers.js";
 
 const generateAccessAndRefreshTokens = async (userId: string) => {
   try {
@@ -226,10 +227,49 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Password changed successfully"));
 });
 
+const updateUserAvatar = asyncHandler(async (req, res) => {
+  // Check if user has uploaded an avatar
+  if (!req.file?.filename) {
+    throw new ApiError(400, "Avatar image is required");
+  }
+
+  // get avatar file system url and local path
+  const avatarUrl = getStaticFilePath(req, req.file?.filename);
+  const avatarLocalPath = getLocalFilePath(req.file?.filename);
+
+  //would fix types laters used any temporarily
+  const user: any = await User.findById(req.user._id);
+
+  let updatedUser = await User.findByIdAndUpdate(
+    req.user._id,
+
+    {
+      $set: {
+        // set the newly uploaded avatar
+        avatar: {
+          url: avatarUrl,
+          localPath: avatarLocalPath,
+        },
+      },
+    },
+    { new: true }
+  ).select(
+    "-password -refreshToken -emailVerificationToken -emailVerificationExpiry"
+  );
+
+  // remove the old avatar
+  removeLocalFile(user.avatar.localPath);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedUser, "Avatar updated successfully"));
+});
+
 export {
   registerUser,
   loginUser,
   logoutUser,
+  updateUserAvatar,
   refreshAccessToken,
   getCurrentUser,
   changeCurrentPassword,
