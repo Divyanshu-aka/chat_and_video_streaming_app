@@ -224,13 +224,13 @@ const GroupChatDetailsModal: React.FC<{
                 leaveTo="translate-x-full"
               >
                 <Dialog.Panel className="pointer-events-auto w-screen max-w-2xl">
-                  <div className="flex h-full flex-col overflow-y-scroll bg-secondary py-6 shadow-xl">
+                  <div className="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-xl">
                     <div className="px-4 sm:px-6">
                       <div className="flex items-start justify-between">
                         <div className="ml-3 flex h-7 items-center">
                           <button
                             type="button"
-                            className="relative rounded-md bg-secondary text-zinc-400 hover:text-zinc-500 focus:outline-none"
+                            className="relative rounded-md bg-white text-[#393E46] hover:text-[#222831] focus:outline-none"
                             onClick={handleClose}
                           >
                             <span className="absolute -inset-2.5" />
@@ -246,7 +246,7 @@ const GroupChatDetailsModal: React.FC<{
                           {groupDetails?.participants.slice(0, 3).map((p) => {
                             return (
                               <img
-                                className="w-24 h-24 -ml-16 rounded-full outline outline-4 outline-secondary"
+                                className="w-24 h-24 -ml-16 rounded-full outline outline-4 outline-white border-2 border-[#00ADB5]"
                                 key={p._id}
                                 src={p.avatar.url}
                                 alt="avatar"
@@ -255,7 +255,9 @@ const GroupChatDetailsModal: React.FC<{
                           })}
                           {groupDetails?.participants &&
                           groupDetails?.participants.length > 3 ? (
-                            <p>+{groupDetails?.participants.length - 3}</p>
+                            <p className="text-[#222831]">
+                              +{groupDetails?.participants.length - 3}
+                            </p>
                           ) : null}
                         </div>
                         <div className="w-full flex flex-col justify-center items-center text-center">
@@ -283,26 +285,26 @@ const GroupChatDetailsModal: React.FC<{
                             </div>
                           ) : (
                             <div className="w-full inline-flex justify-center items-center text-center mt-5">
-                              <h1 className="text-2xl font-semibold truncate-1">
+                              <h1 className="text-2xl font-semibold truncate-1 text-[#222831]">
                                 {groupDetails?.name}
                               </h1>
                               {groupDetails?.admin === user?._id ? (
                                 <button onClick={() => setRenamingGroup(true)}>
-                                  <PencilIcon className="w-5 h-5 ml-4" />
+                                  <PencilIcon className="w-5 h-5 ml-4 text-[#00ADB5]" />
                                 </button>
                               ) : null}
                             </div>
                           )}
 
-                          <p className="mt-2 text-zinc-400 text-sm">
+                          <p className="mt-2 text-[#393E46] text-sm">
                             Group · {groupDetails?.participants.length}{" "}
                             participants
                           </p>
                         </div>
-                        <hr className="border-[0.1px] border-zinc-600 my-5 w-full" />
+                        <hr className="border-[0.1px] border-[#00ADB5]/20 my-5 w-full" />
                         <div className="w-full">
-                          <p className="inline-flex items-center">
-                            <UserGroupIcon className="h-6 w-6 mr-2" />{" "}
+                          <p className="inline-flex items-center text-[#222831]">
+                            <UserGroupIcon className="h-6 w-6 mr-2 text-[#00ADB5]" />{" "}
                             {groupDetails?.participants.length} Participants
                           </p>
                           <div className="w-full">
@@ -312,19 +314,19 @@ const GroupChatDetailsModal: React.FC<{
                                   <div className="flex justify-between items-center w-full py-4">
                                     <div className="flex justify-start items-start gap-3 w-full">
                                       <img
-                                        className="h-12 w-12 rounded-full"
+                                        className="h-12 w-12 rounded-full border-2 border-[#00ADB5]"
                                         src={part.avatar.url}
                                       />
                                       <div>
-                                        <p className="text-white font-semibold text-sm inline-flex items-center w-full">
+                                        <p className="text-[#222831] font-semibold text-sm inline-flex items-center w-full">
                                           {part.username}{" "}
                                           {part._id === groupDetails.admin ? (
-                                            <span className="ml-2 text-[10px] px-4 bg-success/10 border-[0.1px] border-success rounded-full text-success">
+                                            <span className="ml-2 text-[10px] px-4 bg-[#00ADB5]/10 border-[0.1px] border-[#00ADB5] rounded-full text-[#00ADB5]">
                                               admin
                                             </span>
                                           ) : null}
                                         </p>
-                                        <small className="text-zinc-400">
+                                        <small className="text-[#393E46]">
                                           {part.email}
                                         </small>
                                       </div>
@@ -350,7 +352,7 @@ const GroupChatDetailsModal: React.FC<{
                                       </div>
                                     ) : null}
                                   </div>
-                                  <hr className="border-[0.1px] border-zinc-600 my-1 w-full" />
+                                  <hr className="border-[0.1px] border-[#00ADB5]/20 my-1 w-full" />
                                 </React.Fragment>
                               );
                             })}

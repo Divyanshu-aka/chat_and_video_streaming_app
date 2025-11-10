@@ -29,7 +29,7 @@ const Select: React.FC<{
         <Combobox.Button className="w-full">
           <Combobox.Input
             placeholder={placeholder}
-            className="block w-full rounded-xl border-0 py-4 px-5 bg-secondary outline outline-[1px] outline-zinc-400 text-white font-light placeholder:text-white/70 focus:ring-[1px] focus:ring-white"
+            className="block w-full rounded-xl border py-4 px-5 bg-[#EEEEEE] border-[#393E46]/20 text-[#222831] font-light placeholder:text-[#393E46]/60 focus:ring-2 focus:ring-[#00ADB5] focus:border-transparent focus:outline-none transition-all"
             onChange={(e) => {
               setLocalOptions(
                 options.filter((op) => op.label.includes(e.target.value))
@@ -40,13 +40,13 @@ const Select: React.FC<{
         </Combobox.Button>
         <Combobox.Button className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
           <ChevronUpDownIcon
-            className="h-5 w-5 text-zinc-400"
+            className="h-5 w-5 text-[#393E46]"
             aria-hidden="true"
           />
         </Combobox.Button>
 
         {localOptions.length > 0 && (
-          <Combobox.Options className="outline outline-[1px] outline-zinc-400 absolute z-10 mt-2 p-2 max-h-60 w-full overflow-auto rounded-2xl bg-secondary text-base shadow-lg ring-opacity-5 focus:outline-none sm:text-sm">
+          <Combobox.Options className="border border-[#00ADB5]/20 absolute z-10 mt-2 p-2 max-h-60 w-full overflow-auto rounded-2xl bg-white text-base shadow-lg ring-opacity-5 focus:outline-none sm:text-sm">
             {localOptions.map((option) => (
               <Combobox.Option
                 key={option.value}
@@ -54,7 +54,7 @@ const Select: React.FC<{
                 className={({ active }) =>
                   classNames(
                     "cursor-pointer relative rounded-2xl select-none py-4 pl-3 pr-9",
-                    active ? "bg-dark text-white" : "text-white"
+                    active ? "bg-[#00ADB5]/10 text-[#222831]" : "text-[#222831]"
                   )
                 }
               >
@@ -73,7 +73,7 @@ const Select: React.FC<{
                       <span
                         className={classNames(
                           "absolute inset-y-0 right-0 flex items-center pr-4",
-                          active ? "text-white" : "text-indigo-600"
+                          active ? "text-[#00ADB5]" : "text-[#00ADB5]"
                         )}
                       >
                         <CheckIcon className="h-5 w-5" aria-hidden="true" />

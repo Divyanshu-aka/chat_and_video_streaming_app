@@ -5,7 +5,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import moment from "moment";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { deleteOneOnOneChat } from "../../api";
 import { useAuth } from "../../context/AuthContext";
 import type { ChatListItemInterface } from "../../interfaces/chat";
@@ -22,6 +22,13 @@ const ChatItem: React.FC<{
   const { user } = useAuth();
   const [openOptions, setOpenOptions] = useState(false);
   const [openGroupInfo, setOpenGroupInfo] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(true);
+
+  useEffect(() => {
+    // Trigger animation on mount
+    const timer = setTimeout(() => setIsAnimating(false), 500);
+    return () => clearTimeout(timer);
+  }, [chat._id]); // Re-trigger animation when chat ID changes
 
   // Define an asynchronous function named 'deleteChat'.
   const deleteChat = async () => {
@@ -55,45 +62,71 @@ const ChatItem: React.FC<{
         onClick={() => onClick(chat)}
         onMouseLeave={() => setOpenOptions(false)}
         className={classNames(
-          "group px-4 py-3 flex justify-between gap-3 items-center cursor-pointer hover:bg-[#f5f6f6] transition-colors",
-          isActive ? "bg-[#f0f2f5]" : "",
-          unreadCount > 0 ? "" : ""
+          "group px-4 py-3 flex justify-between gap-3 items-center cursor-pointer transition-all duration-500",
+          isActive
+            ? "bg-[#00ADB5]/10 backdrop-blur-sm border-l-4 border-[#00ADB5]"
+            : "hover:bg-[#00ADB5]/5",
+          unreadCount > 0 ? "bg-[#00ADB5]/5" : "",
+          isAnimating ? "animate-slideInFromLeft" : ""
         )}
+        style={{
+          animation: isAnimating ? "slideInFromLeft 0.5s ease-out" : "none",
+        }}
       >
         <div className="flex justify-center items-center flex-shrink-0">
           {chat.isGroupChat ? (
-            <div className="w-[49px] h-[49px] relative flex-shrink-0 bg-[#dfe5e7] rounded-full flex items-center justify-center">
-              <svg className="w-7 h-7 text-[#8696a0]" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M16.5 13c-1.2 0-3.07.34-4.5 1-1.43-.67-3.3-1-4.5-1C5.33 13 1 14.08 1 16.25V19h22v-2.75c0-2.17-4.33-3.25-6.5-3.25zm-4 4.5h-10v-1.25c0-.54 2.56-1.75 5-1.75s5 1.21 5 1.75v1.25zm9 0H14v-1.25c0-.46-.2-.86-.52-1.22.88-.3 1.96-.53 3.02-.53 2.44 0 5 1.21 5 1.75v1.25zM7.5 12c1.93 0 3.5-1.57 3.5-3.5S9.43 5 7.5 5 4 6.57 4 8.5 5.57 12 7.5 12zm0-5.5c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 5.5c1.93 0 3.5-1.57 3.5-3.5S18.43 5 16.5 5 13 6.57 13 8.5s1.57 3.5 3.5 3.5zm0-5.5c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z"/>
+            <div className="w-12 h-12 relative flex-shrink-0 bg-[#00ADB5]/10 rounded-full flex items-center justify-center shadow-sm">
+              <svg
+                className="w-6 h-6 text-[#00ADB5]"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M16.5 13c-1.2 0-3.07.34-4.5 1-1.43-.67-3.3-1-4.5-1C5.33 13 1 14.08 1 16.25V19h22v-2.75c0-2.17-4.33-3.25-6.5-3.25zm-4 4.5h-10v-1.25c0-.54 2.56-1.75 5-1.75s5 1.21 5 1.75v1.25zm9 0H14v-1.25c0-.46-.2-.86-.52-1.22.88-.3 1.96-.53 3.02-.53 2.44 0 5 1.21 5 1.75v1.25zM7.5 12c1.93 0 3.5-1.57 3.5-3.5S9.43 5 7.5 5 4 6.57 4 8.5 5.57 12 7.5 12zm0-5.5c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 5.5c1.93 0 3.5-1.57 3.5-3.5S18.43 5 16.5 5 13 6.57 13 8.5s1.57 3.5 3.5 3.5zm0-5.5c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z" />
               </svg>
             </div>
           ) : (
-            <img
-              src={getChatObjectMetadata(chat, user!).avatar}
-              className="w-[49px] h-[49px] rounded-full object-cover"
-            />
+            <div className="relative">
+              <img
+                src={getChatObjectMetadata(chat, user!).avatar}
+                className="w-12 h-12 rounded-full object-cover border-2 border-[#00ADB5] shadow-sm"
+              />
+              <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#00ADB5] rounded-full border-2 border-white"></div>
+            </div>
           )}
         </div>
-        <div className="flex-1 min-w-0 border-b border-[#e9edef] pb-3">
-          <div className="flex justify-between items-baseline mb-0.5">
-            <p className="font-normal text-[#111b21] text-[17px] truncate">
+        <div className="flex-1 min-w-0 border-b border-[#00ADB5]/10 pb-3">
+          <div className="flex justify-between items-baseline mb-1">
+            <p
+              className={classNames(
+                "font-medium text-[#222831] text-base truncate",
+                unreadCount > 0 ? "font-semibold" : ""
+              )}
+            >
               {getChatObjectMetadata(chat, user!).title}
             </p>
-            <small className="text-[#667781] text-xs flex-shrink-0 ml-2">
+            <small className="text-[#393E46]/70 text-xs flex-shrink-0 ml-2">
               {moment(chat.updatedAt).add("TIME_ZONE", "hours").fromNow(true)}
             </small>
           </div>
           <div className="flex justify-between items-center">
             <div className="flex items-center text-left min-w-0 flex-1">
               {chat.lastMessage && chat.lastMessage.attachments.length > 0 ? (
-                <PaperClipIcon className="text-[#667781] h-4 w-4 mr-1 flex-shrink-0" />
+                <PaperClipIcon className="text-[#393E46]/70 h-4 w-4 mr-1 flex-shrink-0" />
               ) : null}
-              <small className="text-[#667781] text-[14px] truncate leading-[20px]">
-                {getChatObjectMetadata(chat, user!).lastMessage || "No messages yet"}
+              <small
+                className={classNames(
+                  "text-sm truncate",
+                  unreadCount > 0
+                    ? "text-[#222831] font-medium"
+                    : "text-[#393E46]"
+                )}
+              >
+                {getChatObjectMetadata(chat, user!).lastMessage ||
+                  "No messages yet"}
               </small>
             </div>
             {unreadCount > 0 ? (
-              <span className="bg-[#25d366] min-w-[20px] h-5 px-1.5 text-white text-xs rounded-full flex items-center justify-center ml-2 flex-shrink-0 font-medium">
+              <span className="bg-[#00ADB5] min-w-[22px] h-5 px-2 text-white text-xs rounded-full flex items-center justify-center ml-2 flex-shrink-0 font-semibold shadow-sm">
                 {unreadCount > 99 ? "99+" : unreadCount}
               </span>
             ) : null}
@@ -106,10 +139,10 @@ const ChatItem: React.FC<{
           }}
           className="self-start p-1 relative opacity-0 group-hover:opacity-100 transition-opacity -mt-3"
         >
-          <EllipsisVerticalIcon className="h-5 w-5 text-[#54656f]" />
+          <EllipsisVerticalIcon className="h-5 w-5 text-[#8a9ba8]" />
           <div
             className={classNames(
-              "z-20 text-left absolute right-0 top-full mt-1 text-sm w-52 bg-white rounded-md p-2 shadow-xl",
+              "z-20 text-left absolute right-0 top-full mt-1 text-sm w-52 bg-white rounded-xl p-2 shadow-xl border border-[#00ADB5]/20",
               openOptions ? "block" : "hidden"
             )}
           >
@@ -119,9 +152,9 @@ const ChatItem: React.FC<{
                   e.stopPropagation();
                   setOpenGroupInfo(true);
                 }}
-                className="px-6 py-3 w-full rounded inline-flex items-center hover:bg-[#f5f6f6] text-[#3b4a54] text-left text-[14.5px]"
+                className="px-6 py-3 w-full rounded inline-flex items-center hover:bg-[#00ADB5]/10 text-[#222831] text-left text-sm"
               >
-                <InformationCircleIcon className="h-5 w-5 mr-3" /> 
+                <InformationCircleIcon className="h-5 w-5 mr-3" />
                 Group info
               </button>
             ) : (
@@ -135,7 +168,7 @@ const ChatItem: React.FC<{
                     deleteChat();
                   }
                 }}
-                className="px-6 py-3 text-[#3b4a54] rounded w-full inline-flex items-center hover:bg-[#f5f6f6] text-left text-[14.5px]"
+                className="px-6 py-3 text-[#222831] rounded w-full inline-flex items-center hover:bg-[#00ADB5]/10 text-left text-sm"
               >
                 <TrashIcon className="h-5 w-5 mr-3" />
                 Delete chat

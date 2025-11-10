@@ -51,14 +51,14 @@ const MessageItem: React.FC<{
         <div
           onMouseLeave={() => setopenOptions(false)}
           className={classNames(
-            "px-2 py-1.5 rounded-lg flex flex-col relative group shadow-sm",
+            "px-3 py-2 rounded-2xl flex flex-col relative group",
             isOwnMessage
-              ? "bg-[#d9fdd3] rounded-tr-none"
-              : "bg-white rounded-tl-none"
+              ? "bg-[#00ADB5] text-white rounded-tr-sm shadow-sm"
+              : "bg-white rounded-tl-sm border border-[#00ADB5]/20 shadow-sm"
           )}
         >
           {isGroupChatMessage && !isOwnMessage ? (
-            <p className="text-xs font-semibold mb-0.5 text-[#00a884]">
+            <p className="text-xs font-semibold mb-1 text-[#00ADB5]">
               {message.sender?.username}
             </p>
           ) : null}
@@ -106,45 +106,69 @@ const MessageItem: React.FC<{
           ) : null}
 
           {message.content ? (
-            <p className="text-[14.2px] text-[#111b21] break-words whitespace-pre-wrap leading-[19px]">
+            <p
+              className={classNames(
+                "text-sm break-words whitespace-pre-wrap leading-relaxed",
+                isOwnMessage ? "text-white" : "text-[#222831]"
+              )}
+            >
               {message.content}
             </p>
           ) : null}
 
-          <div className="flex items-center justify-end gap-1 mt-0.5 ml-2">
+          <div className="flex items-center justify-end gap-1.5 mt-1">
             {message.attachments?.length > 0 && (
-              <PaperClipIcon className="h-3 w-3 text-[#667781]" />
+              <PaperClipIcon
+                className={classNames(
+                  "h-3 w-3",
+                  isOwnMessage ? "text-white/70" : "text-[#393E46]/70"
+                )}
+              />
             )}
-            <span className="text-[11px] text-[#667781]">
+            <span
+              className={classNames(
+                "text-xs",
+                isOwnMessage ? "text-white/70" : "text-[#393E46]/70"
+              )}
+            >
               {moment(message.updatedAt).format("HH:mm")}
             </span>
             {isOwnMessage && (
-              <svg className="w-[18px] h-[18px] text-[#53bdeb]" viewBox="0 0 16 15" fill="none">
-                <path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.032l-.358-.325a.32.32 0 0 0-.484.032l-.378.48a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.032L1.892 7.77a.366.366 0 0 0-.516.005l-.423.433a.364.364 0 0 0 .006.514l3.255 3.185a.32.32 0 0 0 .484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z" fill="currentColor"/>
+              <svg
+                className="w-4 h-4 text-white/70"
+                viewBox="0 0 16 15"
+                fill="none"
+              >
+                <path
+                  d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.032l-.358-.325a.32.32 0 0 0-.484.032l-.378.48a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.032L1.892 7.77a.366.366 0 0 0-.516.005l-.423.433a.364.364 0 0 0 .006.514l3.255 3.185a.32.32 0 0 0 .484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"
+                  fill="currentColor"
+                />
               </svg>
             )}
           </div>
 
           {isOwnMessage && (
             <button
-              className="absolute -left-8 top-1 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute -left-8 top-1 p-1.5 opacity-0 group-hover:opacity-100 transition-opacity rounded-full hover:bg-[#00ADB5]/10"
               onClick={() => setopenOptions(!openOptions)}
             >
-              <EllipsisVerticalIcon className="w-5 h-5 text-[#8696a0]" />
+              <EllipsisVerticalIcon className="w-4 h-4 text-[#393E46]" />
             </button>
           )}
 
           {openOptions && isOwnMessage && (
-            <div className="absolute -left-32 top-0 bg-white rounded-md shadow-xl p-1 z-30">
+            <div className="absolute -left-32 top-0 bg-white rounded-xl shadow-xl p-1 z-30 border border-[#00ADB5]/20">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  const ok = confirm("Are you sure you want to delete this message?");
+                  const ok = confirm(
+                    "Are you sure you want to delete this message?"
+                  );
                   if (ok) {
                     deleteChatMessage(message);
                   }
                 }}
-                className="px-3 py-2 text-[#3b4a54] rounded w-full inline-flex items-center hover:bg-[#f5f6f6] text-sm whitespace-nowrap"
+                className="px-3 py-2 text-[#222831] rounded-lg w-full inline-flex items-center hover:bg-[#00ADB5]/10 text-sm whitespace-nowrap"
               >
                 <TrashIcon className="h-4 w-4 mr-2" />
                 Delete

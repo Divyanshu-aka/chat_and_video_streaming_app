@@ -6,10 +6,10 @@ import backgroundImg from "../assets/background.png";
 const Auth = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Determine initial mode from route
   const [isLogin, setIsLogin] = useState(location.pathname === "/login");
-  
+
   const [loginData, setLoginData] = useState({
     username: "",
     password: "",
@@ -64,19 +64,17 @@ const Auth = () => {
     >
       {/* Main Auth Card with smooth transitions - anchored at bottom */}
       <div className="max-w-md w-full mx-4  relative z-10">
-        <div 
-          className="bg-white rounded-3xl shadow-xl p-8 md:p-10 transition-all duration-500 ease-in-out origin-bottom"
-        >
+        <div className="bg-white rounded-3xl shadow-xl p-8 md:p-10 transition-all duration-500 ease-in-out origin-bottom">
           {/* Header with transition */}
           <div className="text-center mb-8">
-            <h1 
-              className="text-3xl font-bold text-gray-900 mb-2 transition-all duration-300"
+            <h1
+              className="text-3xl font-bold text-[#222831] mb-2 transition-all duration-300"
               key={isLogin ? "login-title" : "register-title"}
             >
               {isLogin ? "Welcome Back" : "Join ChatStream"}
             </h1>
-            <p 
-              className="text-gray-600 text-sm transition-all duration-300"
+            <p
+              className="text-[#393E46] text-sm transition-all duration-300"
               key={isLogin ? "login-subtitle" : "register-subtitle"}
             >
               {isLogin ? (
@@ -93,16 +91,13 @@ const Auth = () => {
                 </>
               )}
             </p>
-          </div>
-
+          </div>{" "}
           {/* Form fields with smooth transitions */}
           <div className="space-y-4">
             {/* Email field - only for register */}
             <div
               className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                isLogin
-                  ? "max-h-0 opacity-0 -mb-4"
-                  : "max-h-20 opacity-100"
+                isLogin ? "max-h-0 opacity-0 -mb-4" : "max-h-20 opacity-100"
               }`}
             >
               <input
@@ -110,7 +105,7 @@ const Auth = () => {
                 placeholder="Your email address"
                 value={registerData.email}
                 onChange={handleRegisterDataChange("email")}
-                className="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 placeholder-gray-400"
+                className="w-full px-4 py-3.5 border border-[#393E46]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00ADB5] focus:border-transparent text-[#222831] placeholder-[#393E46]/60"
               />
             </div>
 
@@ -127,7 +122,7 @@ const Auth = () => {
                     ? handleLoginDataChange("username")
                     : handleRegisterDataChange("username")
                 }
-                className="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 placeholder-gray-400 transition-all duration-300"
+                className="w-full px-4 py-3.5 border border-[#393E46]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00ADB5] focus:border-transparent text-[#222831] placeholder-[#393E46]/60 transition-all duration-300"
               />
             </div>
 
@@ -142,18 +137,18 @@ const Auth = () => {
                     ? handleLoginDataChange("password")
                     : handleRegisterDataChange("password")
                 }
-                className="w-full px-4 py-3.5 pr-16 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 placeholder-gray-400 transition-all duration-300"
+                className="w-full px-4 py-3.5 pr-16 border border-[#393E46]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00ADB5] focus:border-transparent text-[#222831] placeholder-[#393E46]/60 transition-all duration-300"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#393E46] hover:text-[#222831] transition-colors"
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
             </div>
 
-            <div className="w-full h-[0.5px] bg-gray-500"></div>
+            <div className="w-full h-[0.5px] bg-[#393E46]/30"></div>
 
             {/* Submit button */}
             <button
@@ -163,18 +158,18 @@ const Auth = () => {
                   ? !loginData.username || !loginData.password
                   : Object.values(registerData).some((val) => !val)
               }
-              className="w-full bg-[#ffd89b] hover:bg-[#ffc870] disabled:bg-gray-200 disabled:text-gray-400 text-gray-900 font-medium py-3.5 rounded-xl transition-all duration-200 disabled:cursor-not-allowed"
+              className="w-full bg-[#00ADB5] hover:bg-[#008c94] disabled:bg-[#393E46]/20 disabled:text-[#393E46]/60 text-white font-semibold py-3.5 rounded-xl transition-all duration-200 disabled:cursor-not-allowed shadow-md disabled:shadow-none"
             >
               {isLogin ? "Sign in" : "Create Account"}
             </button>
 
-            <div className="text-center text-sm text-gray-500 my-6">
+            <div className="text-center text-sm text-[#393E46] my-6">
               — Or {isLogin ? "Sign in" : "Sign up"} with —
             </div>
 
             {/* Social login buttons */}
             <div className="grid grid-cols-3 gap-3">
-              <button className="flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
+              <button className="flex items-center justify-center gap-2 px-4 py-3 border border-[#393E46]/30 rounded-xl hover:bg-[#00ADB5]/5 transition-colors">
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"
@@ -195,7 +190,7 @@ const Auth = () => {
                 </svg>
               </button>
 
-              <button className="flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
+              <button className="flex items-center justify-center gap-2 px-4 py-3 border border-[#393E46]/30 rounded-xl hover:bg-[#00ADB5]/5 transition-colors">
                 <svg
                   className="w-5 h-5"
                   viewBox="0 0 24 24"
@@ -205,7 +200,7 @@ const Auth = () => {
                 </svg>
               </button>
 
-              <button className="flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
+              <button className="flex items-center justify-center gap-2 px-4 py-3 border border-[#393E46]/30 rounded-xl hover:bg-[#00ADB5]/5 transition-colors">
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#1877F2">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                 </svg>
@@ -213,11 +208,11 @@ const Auth = () => {
             </div>
 
             {/* Toggle between login and register */}
-            <div className="text-center text-sm text-gray-600 mt-6">
+            <div className="text-center text-sm text-[#393E46] mt-6">
               {isLogin ? "New to our platform?" : "Already have an account?"}{" "}
               <button
                 onClick={toggleMode}
-                className="text-gray-900 font-medium hover:underline"
+                className="text-[#00ADB5] font-medium hover:underline hover:text-[#008c94]"
               >
                 {isLogin ? "Create Account" : "Sign In"}
               </button>
@@ -225,9 +220,9 @@ const Auth = () => {
           </div>
         </div>
 
-        <div className="text-center mt-6 text-sm text-gray-500">
+        <div className="text-center mt-6 text-sm text-[#393E46]">
           © 2025 ChatStream |{" "}
-          <a href="#" className="hover:text-gray-700">
+          <a href="#" className="hover:text-[#00ADB5]">
             Privacy Policy
           </a>
         </div>

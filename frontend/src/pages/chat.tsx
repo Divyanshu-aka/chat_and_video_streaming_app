@@ -1,19 +1,19 @@
-import {
-  PaperAirplaneIcon,
-  XCircleIcon,
-} from "@heroicons/react/20/solid";
+import { XCircleIcon } from "@heroicons/react/20/solid";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   deleteMessage,
   getChatMessages,
   getUserChats,
   sendMessage,
 } from "../api";
-import AddChatModal from "../components/Chat/AddChatModal";
 import ChatItem from "../components/Chat/ChatItem";
 import MessageItem from "../components/Chat/MessageItem";
+import NewChatInline from "../components/Chat/NewChatInline";
 import Typing from "../components/Chat/Typing";
+import ProfileModal from "../components/ProfileModal";
+import LeftSidebar from "../components/layout/LeftSidebar";
+import RightSidebar from "../components/layout/RightSidebar";
+import ProfileSidebar from "../components/layout/ProfileSidebar";
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
 import type {
@@ -26,6 +26,18 @@ import {
   getChatObjectMetadata,
   requestHandler,
 } from "../utils";
+import {
+  Search,
+  Video,
+  MoreVertical,
+  Smile,
+  Paperclip,
+  Mic,
+  Send,
+  Users,
+  Folder,
+  Calendar,
+} from "lucide-react";
 
 const CONNECTED_EVENT = "connected";
 const DISCONNECT_EVENT = "disconnect";
@@ -43,7 +55,6 @@ const ChatPage = () => {
   // Import the 'useAuth' and 'useSocket' hooks from their respective contexts
   const { user, logout } = useAuth();
   const { socket } = useSocket();
-  const navigate = useNavigate();
 
   // Create a reference using 'useRef' to hold the currently selected chat.
   // 'useRef' is used here because it ensures that the 'currentChat' value within socket event callbacks
@@ -57,6 +68,7 @@ const ChatPage = () => {
   const [isConnected, setIsConnected] = useState(false); // For tracking socket connection
 
   const [openAddChat, setOpenAddChat] = useState(false); // To control the 'Add Chat' modal
+  const [openProfile, setOpenProfile] = useState(false); // To control the 'Profile' modal
   const [loadingChats, setLoadingChats] = useState(false); // To indicate loading of chats
   const [loadingMessages, setLoadingMessages] = useState(false); // To indicate loading of messages
 
@@ -74,6 +86,13 @@ const ChatPage = () => {
 
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]); // To store files attached to messages
   const [showMenu, setShowMenu] = useState(false); // To control menu dropdown
+
+  // New state for sidebar management
+  const [activeTab, setActiveTab] = useState<
+    "chats" | "video" | "contacts" | "folders" | "calendar" | "settings"
+  >("chats");
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+  const [isProfileSidebarOpen, setIsProfileSidebarOpen] = useState(false);
 
   /**
    *  A  function to update the last message of a specified chat to update the chat list
@@ -416,391 +435,593 @@ const ChatPage = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (showMenu && !target.closest('.menu-container')) {
+      if (showMenu && !target.closest(".menu-container")) {
         setShowMenu(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showMenu]);
 
   return (
     <>
-      <AddChatModal
-        open={openAddChat}
-        onClose={() => {
-          setOpenAddChat(false);
-        }}
-        onSuccess={() => {
-          getChats();
-        }}
-      />
-
-      <div className="w-full justify-between items-stretch h-screen flex flex-shrink-0 overflow-hidden">
-        {/* Sidebar */}
-        <div className="w-[30%] relative bg-white overflow-y-auto">
-          {/* Header */}
-          <div className="z-10 w-full sticky top-0 bg-[#f0f2f5] px-4 py-2.5 flex justify-between items-center gap-3">
-            <div className="flex items-center gap-3 flex-1">
+      <div className="h-screen w-screen flex align-center justify-between bg-gradient-to-br from-[#393E46] via-[#2d3139] to-[#222831] overflow-hidden">
+        <div className="h-full flex flex-col py-2">
+          <div className="flex items-center justify-end px-2 mb-2">
+            <button
+              onClick={() => setIsProfileSidebarOpen(true)}
+              className="relative group"
+            >
               <img
                 src={user?.avatar?.url || "https://via.placeholder.com/40"}
                 alt="Profile"
-                className="w-10 h-10 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={() => navigate("/profile")}
-                title="View Profile"
+                className="w-16 h-16 rounded-full object-cover border-4 border-[#00ADB5] shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               />
-            </div>
-            <div className="flex items-center gap-5">
-              <button
-                className="text-[#54656f] hover:text-[#111b21] transition-colors"
-                title="Communities"
-              >
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12.072 1.761a10.05 10.05 0 0 0-9.303 5.65.977.977 0 0 0 1.756.855 8.098 8.098 0 0 1 7.496-4.553.977.977 0 1 0 .051-1.952zM1.926 11.64a10.05 10.05 0 0 0 2.137 5.006c.23.305.662.226.865-.12l4.239-7.247c.185-.315.023-.687-.323-.838a7.685 7.685 0 0 1-4.262-4.395c-.115-.373-.526-.479-.832-.269a10.024 10.024 0 0 0-1.824 7.863zm10.119 9.598a10.05 10.05 0 0 0 8.955-5.048c.176-.347-.024-.741-.407-.833l-7.948-1.902c-.34-.081-.68.134-.764.485a7.687 7.687 0 0 1-2.788 4.508c-.296.253-.25.689.082.888a9.996 9.996 0 0 0 2.87.902zm8.716-7.852a10.05 10.05 0 0 0-2.2-5.046c-.236-.301-.66-.22-.862.13l-4.239 7.247c-.185.315-.023.687.323.838a7.685 7.685 0 0 1 4.262 4.395c.115.373.526.479.832.269a10.024 10.024 0 0 0 1.884-7.833zM11.47 2.77a10.054 10.054 0 0 0-8.94 5.046c-.175.347.025.741.407.833l7.948 1.902c.34.081.68-.134.764-.485a7.687 7.687 0 0 1 2.788-4.508c.296-.253.25-.689-.082-.888a9.996 9.996 0 0 0-2.885-.9z"/>
-                </svg>
-              </button>
-              <button
-                className="text-[#54656f] hover:text-[#111b21] transition-colors"
-                title="Status"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 6v6l4 2"/>
-                </svg>
-              </button>
-              <button
-                onClick={() => setOpenAddChat(true)}
-                className="text-[#54656f] hover:text-[#111b21] transition-colors"
-                title="New Chat"
-              >
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19.005 3.175H4.674C3.642 3.175 3 3.789 3 4.821V21.02l3.544-3.514h12.461c1.033 0 2.064-1.06 2.064-2.093V4.821c-.001-1.032-1.032-1.646-2.064-1.646zm-4.989 9.869H7.041V11.1h6.975v1.944zm3-4H7.041V7.1h9.975v1.944z"/>
-                </svg>
-              </button>
-              <div className="relative menu-container">
-                <button
-                  onClick={() => setShowMenu(!showMenu)}
-                  className="text-[#54656f] hover:text-[#111b21] transition-colors"
-                  title="Menu"
-                >
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 7a2 2 0 1 0-.001-4.001A2 2 0 0 0 12 7zm0 2a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 9zm0 6a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 15z"/>
-                  </svg>
-                </button>
-                {showMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200">
-                    <button
-                      onClick={() => {
-                        setShowMenu(false);
-                        navigate("/profile");
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-700 flex items-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      Profile
-                    </button>
-                    <button
-                      onClick={async () => {
-                        setShowMenu(false);
-                        const confirmed = window.confirm("Are you sure you want to logout?");
-                        if (confirmed) {
-                          await logout();
-                        }
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600 flex items-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                      </svg>
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
+              <div className="absolute bottom-0 right-2 w-3.5 h-3.5 bg-[#00ADB5] rounded-full border-2 border-white"></div>
+            </button>
           </div>
 
-          {/* Search */}
-          <div className="px-2 pb-2 pt-2 bg-white border-b border-[#e9edef]">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search or start new chat"
-                value={localSearchQuery}
-                onChange={(e) => setLocalSearchQuery(e.target.value.toLowerCase())}
-                className="w-full bg-[#f0f2f5] text-[#111b21] placeholder-[#667781] rounded-lg px-4 py-2 pl-16 focus:outline-none text-sm"
-              />
-              <svg className="w-5 h-5 absolute left-6 top-2.5 text-[#54656f]" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M15.009 13.805h-.636l-.22-.219a5.184 5.184 0 0 0 1.256-3.386 5.207 5.207 0 1 0-5.207 5.208 5.183 5.183 0 0 0 3.385-1.255l.221.22v.635l4.004 3.999 1.194-1.195-3.997-4.007zm-4.808 0a3.605 3.605 0 1 1 0-7.21 3.605 3.605 0 0 1 0 7.21z"/>
-              </svg>
-            </div>
-          </div>
-
-          {/* Chat List */}
-          <div className="overflow-y-auto">
-            {loadingChats ? (
-              <div className="flex justify-center items-center h-96">
-                <Typing />
-              </div>
-            ) : (
-              [...chats]
-                .filter((chat) =>
-                  localSearchQuery
-                    ? getChatObjectMetadata(chat, user!)
-                        .title?.toLocaleLowerCase()
-                        ?.includes(localSearchQuery)
-                    : true
-                )
-                .map((chat) => {
-                  return (
-                    <ChatItem
-                      chat={chat}
-                      isActive={chat._id === currentChat.current?._id}
-                      unreadCount={
-                        unreadMessages.filter((n) => n.chat === chat._id).length
-                      }
-                      onClick={(chat) => {
-                        if (
-                          currentChat.current?._id &&
-                          currentChat.current?._id === chat._id
-                        )
-                          return;
-                        LocalStorage.set("currentChat", chat);
-                        currentChat.current = chat;
-                        setMessage("");
-                        getMessages();
-                      }}
-                      key={chat._id}
-                      onChatDelete={(chatId) => {
-                        setChats((prev) =>
-                          prev.filter((chat) => chat._id !== chatId)
-                        );
-                        if (currentChat.current?._id === chatId) {
-                          currentChat.current = null;
-                          LocalStorage.remove("currentChat");
-                        }
-                      }}
-                    />
-                  );
-                })
-            )}
-          </div>
+          <LeftSidebar activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
 
-        {/* Chat Area */}
-        <div className="w-[70%] flex flex-col">
-          {currentChat.current && currentChat.current?._id ? (
-            <>
-              {/* Chat Header */}
-              <div className="px-4 py-2.5 bg-[#f0f2f5] flex justify-between items-center border-l border-[#d1d7db]">
-                <div className="flex justify-start items-center gap-3">
-                  {currentChat.current.isGroupChat ? (
-                    <div className="w-10 h-10 relative flex-shrink-0">
-                      {currentChat.current.participants
-                        .slice(0, 3)
-                        .map((participant, i) => {
-                          return (
-                            <img
-                              key={participant._id}
-                              src={participant.avatar.url}
-                              className={classNames(
-                                "w-7 h-7 border-2 border-white rounded-full absolute object-cover",
-                                i === 0
-                                  ? "left-0 top-0 z-30"
-                                  : i === 1
-                                  ? "left-2.5 top-0 z-20"
-                                  : i === 2
-                                  ? "left-5 top-0 z-10"
-                                  : ""
-                              )}
-                            />
-                          );
-                        })}
-                    </div>
-                  ) : (
-                    <img
-                      className="h-10 w-10 rounded-full flex-shrink-0 object-cover"
-                      src={
-                        getChatObjectMetadata(currentChat.current, user!).avatar
-                      }
-                    />
-                  )}
-                  <div>
-                    <p className="font-medium text-[#111b21] text-[16px]">
-                      {getChatObjectMetadata(currentChat.current, user!).title}
-                    </p>
-                    <small className="text-[#667781] text-[13px] leading-[20px]">
-                      {
-                        getChatObjectMetadata(currentChat.current, user!)
-                          .description
-                      }
-                    </small>
-                  </div>
-                </div>
-                <div className="flex items-center gap-5">
-                  <button className="text-[#54656f] hover:text-[#111b21] transition-colors">
-                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M15.009 13.805h-.636l-.22-.219a5.184 5.184 0 0 0 1.256-3.386 5.207 5.207 0 1 0-5.207 5.208 5.183 5.183 0 0 0 3.385-1.255l.221.22v.635l4.004 3.999 1.194-1.195-3.997-4.007zm-4.808 0a3.605 3.605 0 1 1 0-7.21 3.605 3.605 0 0 1 0 7.21z"/>
-                    </svg>
-                  </button>
-                  <button className="text-[#54656f] hover:text-[#111b21] transition-colors">
-                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 7a2 2 0 1 0-.001-4.001A2 2 0 0 0 12 7zm0 2a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 9zm0 6a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 15z"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
+        <div className="flex-1 flex flex-col mr-4 mb-4">
+          <div className="flex items-center justify-between p-2 gap-3">
+            <h1 className="text-2xl font-bold text-[#EEEEEE]">
+              Hi, {user?.username?.split(" ")[0] || "Jamaica"}!
+            </h1>
 
-              {/* Messages */}
-              <div
-                className={classNames(
-                  "flex-1 overflow-y-auto px-16 py-3 flex flex-col-reverse gap-1.5",
-                  "bg-[#efeae2]"
-                )}
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='84' height='88' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d9dbd5' fill-opacity='0.4'%3E%3Cpath d='M37.534 14.161c-.085.341-.248.656-.478.925a2.68 2.68 0 01-.667.565 1.982 1.982 0 01-.927.208c-.36-.01-.71-.113-1.022-.303a2.145 2.145 0 01-.696-.722 2.37 2.37 0 01-.281-1.033c-.005-.362.074-.719.232-1.043.157-.324.387-.605.669-.822.282-.217.61-.362.96-.424.35-.062.71-.04 1.052.066.341.105.65.29.904.539.254.25.443.558.554.903.11.345.139.711.084 1.07l-.384.071zm26.318-4.967c.14.42.176.869.104 1.305-.071.436-.248.846-.516 1.195-.268.35-.616.628-1.016.812-.4.184-.844.267-1.29.243a2.505 2.505 0 01-1.265-.398 2.652 2.652 0 01-.862-.894 2.924 2.924 0 01-.348-1.277c-.006-.448.09-.889.283-1.29.192-.4.478-.747.834-1.012.356-.265.772-.44 1.214-.512.443-.072.9-.039 1.333.098.434.136.827.371 1.149.685.322.315.562.701.698 1.129l-.318.116z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-                }}
-              >
-                {loadingMessages ? (
-                  <div className="flex justify-center items-center h-full">
-                    <Typing />
-                  </div>
+            <div className="flex-1 flex justify-center">
+              <p className="font-bold text-[#00ADB5]">
+                {new Date().toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+            </div>
+
+            <div className=""></div>
+          </div>
+
+          {/* Middle Section - Chat List & Messages (Floating Window) */}
+          <div className="flex-1 flex overflow-hidden rounded-3xl shadow-2xl bg-[#EEEEEE] backdrop-blur-xl border border-[#00ADB5]/20 relative">
+            <ProfileModal
+              open={openProfile}
+              onClose={() => {
+                setOpenProfile(false);
+              }}
+            />
+
+            {/* Chat List */}
+            <div className="w-80 bg-white border-r border-[#00ADB5]/20 flex flex-col">
+              {activeTab === "chats" ? (
+                openAddChat ? (
+                  /* New Chat Creation Interface */
+                  <NewChatInline
+                    onClose={() => setOpenAddChat(false)}
+                    onSuccess={() => {
+                      getChats();
+                      setOpenAddChat(false);
+                    }}
+                  />
                 ) : (
                   <>
-                    {isTyping ? <Typing /> : null}
-                    {messages?.map((msg) => {
-                      return (
-                        <MessageItem
-                          key={msg._id}
-                          isOwnMessage={msg.sender?._id === user?._id}
-                          isGroupChatMessage={currentChat.current?.isGroupChat}
-                          message={msg}
-                          deleteChatMessage={deleteChatMessage}
+                    {/* Header with Profile */}
+                    <div className="p-4 border-b border-[#00ADB5]/20">
+                      <div className="flex items-center gap-3 mb-4">
+                        <img
+                          src={
+                            user?.avatar?.url ||
+                            "https://via.placeholder.com/40"
+                          }
+                          alt="Profile"
+                          className="w-10 h-10 rounded-full object-cover border-2 border-[#00ADB5]"
                         />
-                      );
-                    })}
-                  </>
-                )}
-              </div>
-
-              {/* Attachments Preview */}
-              {attachedFiles.length > 0 ? (
-                <div className="px-4 py-3 bg-[#f0f2f5]">
-                  <div className="flex gap-2 overflow-x-auto">
-                    {attachedFiles.map((file, i) => {
-                      return (
-                        <div
-                          key={i}
-                          className="relative flex-shrink-0 w-20 h-20 rounded overflow-hidden group"
-                        >
-                          <img
-                            className="w-full h-full object-cover"
-                            src={URL.createObjectURL(file)}
-                            alt="attachment"
-                          />
-                          <button
-                            onClick={() => {
-                              setAttachedFiles(
-                                attachedFiles.filter((_, ind) => ind !== i)
-                              );
-                            }}
-                            className="absolute -top-1.5 -right-1.5 bg-[#ef4444] hover:bg-[#dc2626] rounded-full p-1"
-                          >
-                            <XCircleIcon className="h-4 w-4 text-white" />
-                          </button>
+                        <div className="flex-1">
+                          <h1 className="text-lg font-bold text-[#222831]">
+                            Hi, {user?.username?.split(" ")[0] || "Jamaica"}!
+                          </h1>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ) : null}
 
-              {/* Input Area */}
-              <div className="px-4 py-2 bg-[#f0f2f5] flex items-center gap-2 border-l border-[#d1d7db]">
-                <button className="p-2 rounded-full hover:bg-[#d1d7db]/30 text-[#54656f] transition-colors">
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9.153 11.603c.795 0 1.439-.879 1.439-1.962s-.644-1.962-1.439-1.962-1.439.879-1.439 1.962.644 1.962 1.439 1.962zm-3.204 1.362c-.026-.307-.131 5.218 6.063 5.551 6.066-.25 6.066-5.551 6.066-5.551-6.078 1.416-12.129 0-12.129 0zm11.363 1.108s-.669 1.959-5.051 1.959c-3.505 0-5.388-1.164-5.607-1.959 0 0 5.912 1.055 10.658 0zM11.804 1.011C5.609 1.011.978 6.033.978 12.228s4.826 10.761 11.021 10.761S23.02 18.423 23.02 12.228c.001-6.195-5.021-11.217-11.216-11.217zM12 21.354c-5.273 0-9.381-3.886-9.381-9.159s3.942-9.548 9.215-9.548 9.548 4.275 9.548 9.548c-.001 5.272-4.109 9.159-9.382 9.159zm3.108-9.751c.795 0 1.439-.879 1.439-1.962s-.644-1.962-1.439-1.962-1.439.879-1.439 1.962.644 1.962 1.439 1.962z"/>
-                  </svg>
-                </button>
-                <input
-                  hidden
-                  id="attachments"
-                  type="file"
-                  value=""
-                  multiple
-                  max={5}
-                  onChange={(e) => {
-                    if (e.target.files) {
-                      setAttachedFiles([...e.target.files]);
-                    }
-                  }}
-                />
-                <label
-                  htmlFor="attachments"
-                  className="p-2 rounded-full hover:bg-[#d1d7db]/30 text-[#54656f] cursor-pointer transition-colors"
-                >
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M1.816 15.556v.002c0 1.502.584 2.912 1.646 3.972s2.472 1.647 3.974 1.647a5.58 5.58 0 003.972-1.645l9.547-9.548c.769-.768 1.147-1.767 1.058-2.817-.079-.968-.548-1.927-1.319-2.698-1.594-1.592-4.068-1.711-5.517-.262l-7.916 7.915c-.881.881-.792 2.25.214 3.261.959.958 2.423 1.053 3.263.215l5.511-5.512c.28-.28.267-.722.053-.936l-.244-.244c-.191-.191-.567-.349-.957.04l-5.506 5.506c-.18.18-.635.127-.976-.214-.098-.097-.576-.613-.213-.973l7.915-7.917c.818-.817 2.267-.699 3.23.262.5.501.802 1.1.849 1.685.051.573-.156 1.111-.589 1.543l-9.547 9.549a3.97 3.97 0 01-2.829 1.171 3.975 3.975 0 01-2.83-1.173 3.973 3.973 0 01-1.172-2.828c0-1.071.415-2.076 1.172-2.83l7.209-7.211c.157-.157.264-.579.028-.814L11.5 4.36a.572.572 0 00-.834.018l-7.205 7.207a5.577 5.577 0 00-1.645 3.971z"/>
-                  </svg>
-                </label>
+                        <button
+                          onClick={() => setOpenAddChat(true)}
+                          className="p-2 hover:bg-[#00ADB5]/10 rounded-full transition-colors group"
+                          title="New Chat"
+                        >
+                          <svg
+                            className="w-5 h-5 text-[#393E46] group-hover:text-[#00ADB5]"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            strokeWidth="2"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M12 4v16m8-8H4"
+                            />
+                          </svg>
+                        </button>
 
-                <input
-                  type="text"
-                  placeholder="Type a message"
-                  value={message}
-                  onChange={handleOnMessageChange}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      sendChatMessage();
-                    }
-                  }}
-                  className="flex-1 bg-white text-[#111b21] placeholder-[#667781] rounded-lg px-4 py-2.5 focus:outline-none text-[15px]"
-                />
-                <button
-                  onClick={sendChatMessage}
-                  disabled={!message && attachedFiles.length <= 0}
-                  className="p-2 rounded-full hover:bg-[#d1d7db]/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-[#54656f]"
-                >
-                  {message || attachedFiles.length > 0 ? (
-                    <PaperAirplaneIcon className="w-6 h-6" />
-                  ) : (
-                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M11.999 14.942c2.001 0 3.531-1.53 3.531-3.531V4.35c0-2.001-1.53-3.531-3.531-3.531S8.469 2.35 8.469 4.35v7.061c0 2.001 1.53 3.531 3.53 3.531zm6.238-3.53c0 3.531-2.942 6.002-6.237 6.002s-6.237-2.471-6.237-6.002H3.761c0 4.001 3.178 7.297 7.061 7.885v3.884h2.354v-3.884c3.884-.588 7.061-3.884 7.061-7.885h-2z"/>
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="w-full h-full flex flex-col justify-center items-center text-gray-500 bg-[#f8f9fa] border-l border-[#d1d7db]">
-              <div className="text-center max-w-md px-8">
-                <div className="mb-8 inline-block">
-                  <svg viewBox="0 0 303 172" className="w-80 h-auto opacity-60" fill="none">
-                    <path d="M151.5 1.5C68.8 1.5 1 69.3 1 152s67.8 150.5 150.5 150.5S302 234.7 302 152 234.2 1.5 151.5 1.5zm0 270.5c-66.3 0-120-53.7-120-120s53.7-120 120-120 120 53.7 120 120-53.7 120-120 120z" fill="#d1d7db" opacity="0.3"/>
-                    <circle cx="151.5" cy="152" r="45" fill="#d1d7db" opacity="0.3"/>
-                  </svg>
-                </div>
-                <h3 className="text-[32px] font-light mb-4 text-[#41525d]">ChatStream Web</h3>
-                <p className="text-sm text-[#667781] leading-[20px] mb-8">
-                  Send and receive messages without keeping your phone online.<br/>
-                  Use ChatStream on up to 4 linked devices and 1 phone at the same time.
-                </p>
-                <div className="border-t border-[#d1d7db] pt-6">
-                  <div className="flex items-center justify-center gap-1 text-xs text-[#667781]">
-                    <svg className="w-3 h-3" viewBox="0 0 10 12" fill="currentColor">
-                      <path d="M5 0C3.1 0 1.5 1.6 1.5 3.5c0 1.4.8 2.6 2 3.2v2.3c0 .3.2.5.5.5h2c.3 0 .5-.2.5-.5V6.7c1.2-.6 2-1.8 2-3.2C8.5 1.6 6.9 0 5 0zm1 6.2c-.2.1-.3.3-.3.5v2H4.3v-2c0-.2-.1-.4-.3-.5C3.3 6 2.8 5.3 2.8 4.5c0-1.2.9-2.2 2.2-2.2s2.2 1 2.2 2.2c0 .8-.5 1.5-1.2 1.7z"/>
-                    </svg>
-                    <span>End-to-end encrypted</span>
+                        <div className="relative">
+                          <button
+                            onClick={() => setShowMenu(!showMenu)}
+                            className="p-2 hover:bg-[#00ADB5]/10 rounded-full transition-colors"
+                          >
+                            <MoreVertical className="w-5 h-5 text-[#393E46]" />
+                          </button>
+                          {showMenu && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl py-2 z-50 border border-[#00ADB5]/20">
+                              <button
+                                onClick={() => {
+                                  setShowMenu(false);
+                                  setOpenProfile(true);
+                                }}
+                                className="w-full text-left px-4 py-2 hover:bg-[#00ADB5]/10 text-[#222831] flex items-center gap-2"
+                              >
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth="2"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                  />
+                                </svg>
+                                Profile
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  setShowMenu(false);
+                                  const confirmed = window.confirm(
+                                    "Are you sure you want to logout?"
+                                  );
+                                  if (confirmed) {
+                                    await logout();
+                                  }
+                                }}
+                                className="w-full text-left px-4 py-2 hover:bg-[#00ADB5]/10 text-red-600 flex items-center gap-2"
+                              >
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth="2"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                                  />
+                                </svg>
+                                Logout
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Search */}
+                      <div className="relative">
+                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#393E46]" />
+                        <input
+                          type="text"
+                          placeholder="Search"
+                          value={localSearchQuery}
+                          onChange={(e) =>
+                            setLocalSearchQuery(e.target.value.toLowerCase())
+                          }
+                          className="w-full bg-[#EEEEEE] text-[#222831] placeholder-[#393E46]/60 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00ADB5] text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Chat List */}
+                    <div className="flex-1 overflow-y-auto">
+                      {loadingChats ? (
+                        <div className="flex justify-center items-center h-96">
+                          <Typing />
+                        </div>
+                      ) : (
+                        [...chats]
+                          .filter((chat) =>
+                            localSearchQuery
+                              ? getChatObjectMetadata(chat, user!)
+                                  .title?.toLocaleLowerCase()
+                                  ?.includes(localSearchQuery)
+                              : true
+                          )
+                          .map((chat) => {
+                            return (
+                              <ChatItem
+                                chat={chat}
+                                isActive={chat._id === currentChat.current?._id}
+                                unreadCount={
+                                  unreadMessages.filter(
+                                    (n) => n.chat === chat._id
+                                  ).length
+                                }
+                                onClick={(chat) => {
+                                  if (
+                                    currentChat.current?._id &&
+                                    currentChat.current?._id === chat._id
+                                  )
+                                    return;
+                                  LocalStorage.set("currentChat", chat);
+                                  currentChat.current = chat;
+                                  setMessage("");
+                                  getMessages();
+                                }}
+                                key={chat._id}
+                                onChatDelete={(chatId) => {
+                                  setChats((prev) =>
+                                    prev.filter((chat) => chat._id !== chatId)
+                                  );
+                                  if (currentChat.current?._id === chatId) {
+                                    currentChat.current = null;
+                                    LocalStorage.remove("currentChat");
+                                  }
+                                }}
+                              />
+                            );
+                          })
+                      )}
+                    </div>
+
+                    {/* Add Chat Button - removed, will use floating button */}
+                  </>
+                )
+              ) : (
+                /* Placeholder content for other tabs */
+                <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                  <div className="mb-4">
+                    {activeTab === "video" && (
+                      <Video className="w-16 h-16 text-[#00ADB5] mx-auto mb-4" />
+                    )}
+                    {activeTab === "contacts" && (
+                      <Users className="w-16 h-16 text-[#00ADB5] mx-auto mb-4" />
+                    )}
+                    {activeTab === "folders" && (
+                      <Folder className="w-16 h-16 text-[#00ADB5] mx-auto mb-4" />
+                    )}
+                    {activeTab === "calendar" && (
+                      <Calendar className="w-16 h-16 text-[#00ADB5] mx-auto mb-4" />
+                    )}
+                    {activeTab === "settings" && (
+                      <svg
+                        className="w-16 h-16 text-[#00ADB5] mx-auto mb-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                    )}
                   </div>
+                  <h3 className="text-xl font-semibold text-[#222831] mb-2 capitalize">
+                    {activeTab}
+                  </h3>
+                  <p className="text-[#393E46] text-sm">
+                    This feature is coming soon!
+                  </p>
                 </div>
-              </div>
+              )}
             </div>
-          )}
+
+            {/* Chat Window */}
+            <div className="flex-1 flex flex-col bg-[#EEEEEE]">
+              {activeTab === "chats" ? (
+                currentChat.current && currentChat.current?._id ? (
+                  <>
+                    {/* Chat User Info */}
+                    <div className="px-6 py-4 bg-white flex justify-between items-center border-b border-[#00ADB5]/20">
+                      <div className="flex items-center gap-3">
+                        {currentChat.current.isGroupChat ? (
+                          <div className="w-12 h-12 relative shrink-0">
+                            {currentChat.current.participants
+                              .slice(0, 3)
+                              .map((participant, i) => {
+                                return (
+                                  <img
+                                    key={participant._id}
+                                    src={participant.avatar.url}
+                                    className={classNames(
+                                      "w-8 h-8 border-2 border-white rounded-full absolute object-cover",
+                                      i === 0
+                                        ? "left-0 top-0 z-30"
+                                        : i === 1
+                                        ? "left-2.5 top-0 z-20"
+                                        : i === 2
+                                        ? "left-5 top-0 z-10"
+                                        : ""
+                                    )}
+                                  />
+                                );
+                              })}
+                          </div>
+                        ) : (
+                          <div className="relative">
+                            <img
+                              className="h-12 w-12 rounded-full shrink-0 object-cover border-2 border-[#00ADB5] shadow-sm"
+                              src={
+                                getChatObjectMetadata(
+                                  currentChat.current,
+                                  user!
+                                ).avatar
+                              }
+                            />
+                            <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#00ADB5] rounded-full border-2 border-white"></div>
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-semibold text-[#222831] text-lg">
+                            {
+                              getChatObjectMetadata(currentChat.current, user!)
+                                .title
+                            }
+                          </p>
+                          <small className="text-[#393E46] text-sm">
+                            {
+                              getChatObjectMetadata(currentChat.current, user!)
+                                .description
+                            }
+                          </small>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button className="p-2.5 rounded-full hover:bg-[#00ADB5]/10 text-[#393E46] transition-colors">
+                          <Search className="w-5 h-5" />
+                        </button>
+                        <button className="p-2.5 rounded-full hover:bg-[#00ADB5]/10 text-[#393E46] transition-colors">
+                          <Video className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() =>
+                            setIsRightSidebarOpen(!isRightSidebarOpen)
+                          }
+                          className="p-2.5 rounded-full hover:bg-[#00ADB5]/10 text-[#393E46] transition-colors"
+                        >
+                          <MoreVertical className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Messages */}
+                    <div className="flex-1 overflow-y-auto px-8 py-4 flex flex-col-reverse gap-2 bg-[#EEEEEE]">
+                      {loadingMessages ? (
+                        <div className="flex justify-center items-center h-full">
+                          <Typing />
+                        </div>
+                      ) : (
+                        <>
+                          {isTyping ? <Typing /> : null}
+                          {messages?.map((msg) => {
+                            return (
+                              <MessageItem
+                                key={msg._id}
+                                isOwnMessage={msg.sender?._id === user?._id}
+                                isGroupChatMessage={
+                                  currentChat.current?.isGroupChat
+                                }
+                                message={msg}
+                                deleteChatMessage={deleteChatMessage}
+                              />
+                            );
+                          })}
+                        </>
+                      )}
+                    </div>
+
+                    {/* Attachments Preview */}
+                    {attachedFiles.length > 0 ? (
+                      <div className="px-6 py-3 bg-white border-t border-[#00ADB5]/20">
+                        <div className="flex gap-2 overflow-x-auto">
+                          {attachedFiles.map((file, i) => {
+                            return (
+                              <div
+                                key={i}
+                                className="relative shrink-0 w-20 h-20 rounded-xl overflow-hidden group"
+                              >
+                                <img
+                                  className="w-full h-full object-cover"
+                                  src={URL.createObjectURL(file)}
+                                  alt="attachment"
+                                />
+                                <button
+                                  onClick={() => {
+                                    setAttachedFiles(
+                                      attachedFiles.filter(
+                                        (_, ind) => ind !== i
+                                      )
+                                    );
+                                  }}
+                                  className="absolute -top-1.5 -right-1.5 bg-red-500 hover:bg-red-600 rounded-full p-1"
+                                >
+                                  <XCircleIcon className="h-4 w-4 text-white" />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {/* Input Area */}
+                    <div className="px-6 py-4 flex justify-between bg-white border-t border-[#00ADB5]/20">
+                      <div className="flex flex-1 items-center gap-3 bg-[#EEEEEE] rounded-2xl px-2 mx-4">
+                        <button className="p-2 rounded-full hover:bg-[#00ADB5]/10 text-[#393E46] transition-colors">
+                          <Smile className="w-5 h-5" />
+                        </button>
+
+                        <input
+                          hidden
+                          id="attachments"
+                          type="file"
+                          value=""
+                          multiple
+                          max={5}
+                          onChange={(e) => {
+                            if (e.target.files) {
+                              setAttachedFiles([...e.target.files]);
+                            }
+                          }}
+                        />
+                        <label
+                          htmlFor="attachments"
+                          className="p-2 rounded-full hover:bg-[#00ADB5]/10 text-[#393E46] cursor-pointer transition-colors"
+                        >
+                          <Paperclip className="w-5 h-5" />
+                        </label>
+
+                        <input
+                          type="text"
+                          placeholder="Type a message..."
+                          value={message}
+                          onChange={handleOnMessageChange}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              sendChatMessage();
+                            }
+                          }}
+                          className="flex-1 bg-transparent text-[#222831] placeholder-[#393E46]/60 focus:outline-none text-sm"
+                        />
+                      </div>
+                      <button
+                        onClick={sendChatMessage}
+                        disabled={!message && attachedFiles.length <= 0}
+                        className="p-2.5 rounded-full bg-[#00ADB5] hover:bg-[#008c94] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md disabled:shadow-none text-white"
+                      >
+                        {message || attachedFiles.length > 0 ? (
+                          <Send className="w-5 h-5" />
+                        ) : (
+                          <Mic className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full h-full flex flex-col justify-center items-center text-[#393E46] bg-[#EEEEEE]">
+                    <div className="text-center max-w-md px-8">
+                      <div className="mb-8 inline-block">
+                        <svg
+                          viewBox="0 0 240 240"
+                          className="w-48 h-auto opacity-30"
+                          fill="none"
+                        >
+                          <circle
+                            cx="120"
+                            cy="120"
+                            r="80"
+                            fill="#00ADB5"
+                            opacity="0.2"
+                          />
+                          <circle
+                            cx="120"
+                            cy="120"
+                            r="50"
+                            fill="#00ADB5"
+                            opacity="0.4"
+                          />
+                        </svg>
+                      </div>
+                      <h3 className="text-2xl font-light mb-3 text-[#222831]">
+                        Select a chat to start messaging
+                      </h3>
+                      <p className="text-sm text-[#393E46] mb-6">
+                        Choose a conversation from the list to view messages
+                      </p>
+                      <button
+                        onClick={() => setOpenAddChat(true)}
+                        className="px-6 py-2.5 bg-[#00ADB5] hover:bg-[#008c94] text-white rounded-lg transition-colors"
+                      >
+                        Start New Chat
+                      </button>
+                    </div>
+                  </div>
+                )
+              ) : (
+                /* Placeholder when no tab is selected or non-chat tabs */
+                <div className="w-full h-full flex flex-col justify-center items-center text-[#393E46] bg-[#EEEEEE]">
+                  <div className="text-center max-w-md px-8">
+                    <div className="mb-8 inline-block">
+                      {activeTab === "video" && (
+                        <Video className="w-24 h-24 text-[#00ADB5] mx-auto" />
+                      )}
+                      {activeTab === "contacts" && (
+                        <Users className="w-24 h-24 text-[#00ADB5] mx-auto" />
+                      )}
+                      {activeTab === "folders" && (
+                        <Folder className="w-24 h-24 text-[#00ADB5] mx-auto" />
+                      )}
+                      {activeTab === "calendar" && (
+                        <Calendar className="w-24 h-24 text-[#00ADB5] mx-auto" />
+                      )}
+                      {activeTab === "settings" && (
+                        <svg
+                          className="w-24 h-24 text-[#00ADB5] mx-auto"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          strokeWidth="2"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    <h3 className="text-2xl font-light mb-3 text-[#222831] capitalize">
+                      {activeTab}
+                    </h3>
+                    <p className="text-sm text-[#393E46] mb-6">
+                      This feature is coming soon!
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right Sidebar */}
+            <RightSidebar
+              isOpen={isRightSidebarOpen}
+              onClose={() => setIsRightSidebarOpen(false)}
+            />
+
+            {/* Profile Sidebar */}
+            <ProfileSidebar
+              isOpen={isProfileSidebarOpen}
+              onClose={() => setIsProfileSidebarOpen(false)}
+              user={user}
+              onEditProfile={() => setOpenProfile(true)}
+              onLogout={logout}
+            />
+          </div>
         </div>
       </div>
     </>
