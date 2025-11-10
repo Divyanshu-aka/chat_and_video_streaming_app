@@ -58,26 +58,35 @@ const ChatItem: React.FC<{
         onGroupDelete={onChatDelete}
       />
       <div
-        role="button"
         onClick={() => onClick(chat)}
         onMouseLeave={() => setOpenOptions(false)}
         className={classNames(
-          "group px-4 py-3 flex justify-between gap-3 items-center cursor-pointer transition-all duration-500",
+          "group px-4 py-3 flex justify-between gap-3 items-center cursor-pointer transition-all duration-100",
           isActive
-            ? "bg-[#00ADB5]/10 backdrop-blur-sm border-l-4 border-[#00ADB5]"
-            : "hover:bg-[#00ADB5]/5",
+            ? "bg-linear-to-r from-[#00ADB5]/20 to-[#00ADB5]/10 rounded-2xl mx-2 shadow-lg shadow-[#00ADB5]/20 scale-[1.02] "
+            : "hover:bg-[#00ADB5]/5 hover:rounded-xl hover:mx-1",
           unreadCount > 0 ? "bg-[#00ADB5]/5" : "",
           isAnimating ? "animate-slideInFromLeft" : ""
         )}
         style={{
-          animation: isAnimating ? "slideInFromLeft 0.5s ease-out" : "none",
+          animation: isAnimating ? "slideInFromLeft 0.07s ease-out" : "none",
         }}
       >
-        <div className="flex justify-center items-center flex-shrink-0">
+        <div className="flex justify-center items-center shrink-0">
           {chat.isGroupChat ? (
-            <div className="w-12 h-12 relative flex-shrink-0 bg-[#00ADB5]/10 rounded-full flex items-center justify-center shadow-sm">
+            <div
+              className={classNames(
+                "w-12 h-12 relative flex-shrink-0 rounded-full flex items-center justify-center shadow-md transition-all duration-300",
+                isActive
+                  ? "bg-gradient-to-br from-[#00ADB5] to-[#008c94] scale-110"
+                  : "bg-[#00ADB5]/10"
+              )}
+            >
               <svg
-                className="w-6 h-6 text-[#00ADB5]"
+                className={classNames(
+                  "w-6 h-6",
+                  isActive ? "text-white" : "text-[#00ADB5]"
+                )}
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -88,9 +97,21 @@ const ChatItem: React.FC<{
             <div className="relative">
               <img
                 src={getChatObjectMetadata(chat, user!).avatar}
-                className="w-12 h-12 rounded-full object-cover border-2 border-[#00ADB5] shadow-sm"
+                className={classNames(
+                  "w-12 h-12 rounded-full object-cover shadow-md transition-all duration-300",
+                  isActive
+                    ? "border-2 border-[#00ADB5] ring-4 ring-[#00ADB5]/20 scale-110"
+                    : "border-2 border-[#00ADB5]/30"
+                )}
               />
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#00ADB5] rounded-full border-2 border-white"></div>
+              <div
+                className={classNames(
+                  "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white transition-all duration-300",
+                  isActive
+                    ? "bg-[#00ADB5] ring-2 ring-[#00ADB5]/30"
+                    : "bg-[#00ADB5]"
+                )}
+              ></div>
             </div>
           )}
         </div>
@@ -126,20 +147,29 @@ const ChatItem: React.FC<{
               </small>
             </div>
             {unreadCount > 0 ? (
-              <span className="bg-[#00ADB5] min-w-[22px] h-5 px-2 text-white text-xs rounded-full flex items-center justify-center ml-2 flex-shrink-0 font-semibold shadow-sm">
+              <span
+                className={classNames(
+                  "min-w-[22px] h-5 px-2 text-white text-xs rounded-full flex items-center justify-center ml-2 flex-shrink-0 font-semibold transition-all duration-300",
+                  isActive
+                    ? "bg-white text-[#00ADB5] shadow-md scale-110"
+                    : "bg-[#00ADB5] shadow-sm"
+                )}
+              >
                 {unreadCount > 99 ? "99+" : unreadCount}
               </span>
             ) : null}
           </div>
         </div>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setOpenOptions(!openOptions);
-          }}
-          className="self-start p-1 relative opacity-0 group-hover:opacity-100 transition-opacity -mt-3"
-        >
-          <EllipsisVerticalIcon className="h-5 w-5 text-[#8a9ba8]" />
+        <div className="self-start pt-5 items-center relative">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenOptions(!openOptions);
+            }}
+            className="p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <EllipsisVerticalIcon className="h-5 w-5 text-[#8a9ba8]" />
+          </button>
           <div
             className={classNames(
               "z-20 text-left absolute right-0 top-full mt-1 text-sm w-52 bg-white rounded-xl p-2 shadow-xl border border-[#00ADB5]/20",
@@ -175,7 +205,7 @@ const ChatItem: React.FC<{
               </button>
             )}
           </div>
-        </button>
+        </div>
       </div>
     </>
   );

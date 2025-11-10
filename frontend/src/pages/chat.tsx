@@ -497,7 +497,7 @@ const ChatPage = () => {
             />
 
             {/* Chat List */}
-            <div className="w-80 bg-white border-r border-[#00ADB5]/20 flex flex-col">
+            <div className="w-90 bg-white border-r border-[#00ADB5]/20 flex flex-col">
               {activeTab === "chats" ? (
                 openAddChat ? (
                   /* New Chat Creation Interface */
@@ -626,7 +626,7 @@ const ChatPage = () => {
                     </div>
 
                     {/* Chat List */}
-                    <div className="flex-1 overflow-y-auto">
+                    <div className="flex-1 p-2 overflow-y-auto">
                       {loadingChats ? (
                         <div className="flex justify-center items-center h-96">
                           <Typing />
